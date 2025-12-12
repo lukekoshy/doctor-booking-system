@@ -1,0 +1,164 @@
+{
+  "info": {
+    "name": "Ticket Booking System API",
+    "description": "Complete API collection for the ticket booking system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Admin Operations",
+      "item": [
+        {
+          "name": "Create Doctor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. Sarah Johnson\",\n  \"specialization\": \"Neurology\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/doctors",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "doctors"]
+            }
+          }
+        },
+        {
+          "name": "Create Slot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start_time\": \"2025-12-20T10:00:00Z\",\n  \"end_time\": \"2025-12-20T11:00:00Z\",\n  \"capacity\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/doctors/{{doctor_id}}/slots",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "doctors", "{{doctor_id}}", "slots"]
+            }
+          }
+        },
+        {
+          "name": "List Doctors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/doctors",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "doctors"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Booking Operations",
+      "item": [
+        {
+          "name": "List Slots",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/slots",
+              "host": ["{{base_url}}"],
+              "path": ["api", "slots"]
+            }
+          }
+        },
+        {
+          "name": "Get Slot Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/slots/{{slot_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "slots", "{{slot_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient_name\": \"John Doe\",\n  \"patient_contact\": \"john@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/slots/{{slot_id}}/book",
+              "host": ["{{base_url}}"],
+              "path": ["api", "slots", "{{slot_id}}", "book"]
+            }
+          }
+        },
+        {
+          "name": "Confirm Booking",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/{{booking_id}}/confirm",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "{{booking_id}}", "confirm"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "key": "doctor_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "slot_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "booking_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

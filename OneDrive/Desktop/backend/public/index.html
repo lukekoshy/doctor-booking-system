@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Booking System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            padding: 10px 15px;
+            border-radius: 5px;
+            background: #e3f2fd;
+            color: #1976d2;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .status.connected {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-button {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-button:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+            display: block;
+        }
+
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+            display: block;
+        }
+
+        .message.info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border-left: 4px solid #2196f3;
+            display: block;
+        }
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .slot-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+
+        .slot-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .slot-card h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .slot-card p {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .slot-card .capacity {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .capacity-bar {
+            background: #ddd;
+            height: 6px;
+            border-radius: 3px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .capacity-fill {
+            background: #4caf50;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .capacity-fill.warning {
+            background: #ff9800;
+        }
+
+        .capacity-fill.danger {
+            background: #f44336;
+        }
+
+        .btn-book {
+            background: #667eea;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-book:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .doctor-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .doctor-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        .doctor-card h3 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .doctor-card p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+            background: none;
+            border: none;
+            padding: 0;
+            width: auto;
+        }
+
+        .close-btn:hover {
+            color: #333;
+            background: none;
+        }
+
+        .booking-list {
+            margin-top: 20px;
+        }
+
+        .booking-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 10px;
+        }
+
+        .booking-item.confirmed {
+            border-left-color: #4caf50;
+        }
+
+        .booking-item.pending {
+            border-left-color: #ff9800;
+        }
+
+        .booking-item.failed {
+            border-left-color: #f44336;
+        }
+
+        .booking-item p {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-badge.confirmed {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-badge.pending {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .status-badge.failed {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .slot-grid, .doctor-list {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 Doctor Booking System</h1>
+            <div class="status connected" id="status">✓ Connected</div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('book')">📅 Book Appointment</button>
+            <button class="tab-button" onclick="switchTab('slots')">📋 View Slots</button>
+            <button class="tab-button" onclick="switchTab('admin')">⚙️ Admin Panel</button>
+            <button class="tab-button" onclick="switchTab('bookings')">✓ My Bookings</button>
+        </div>
+
+        <!-- Book Appointment Tab -->
+        <div id="book" class="tab-content active">
+            <div class="card">
+                <h2>Book an Appointment</h2>
+                <div id="bookMessage" class="message"></div>
+                <div class="form-group">
+                    <label>Select Slot</label>
+                    <select id="slotSelect" onchange="updateSlotInfo()">
+                        <option value="">-- Loading slots --</option>
+                    </select>
+                </div>
+                <div id="slotInfo"></div>
+                <div class="form-group">
+                    <label>Patient Name *</label>
+                    <input type="text" id="patientName" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label>Contact Number *</label>
+                    <input type="text" id="patientContact" placeholder="Enter your contact number">
+                </div>
+                <button onclick="createBooking()">Book Now</button>
+            </div>
+        </div>
+
+        <!-- View Slots Tab -->
+        <div id="slots" class="tab-content">
+            <div class="card">
+                <h2>Available Slots</h2>
+                <div id="slotsMessage" class="message"></div>
+                <div id="slotsContainer" class="slot-grid">
+                    <div class="no-data">Loading slots...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel Tab -->
+        <div id="admin" class="tab-content">
+            <div class="card">
+                <h2>Add Doctor</h2>
+                <div id="adminMessage" class="message"></div>
+                <div class="form-group">
+                    <label>Doctor Name *</label>
+                    <input type="text" id="doctorName" placeholder="Enter doctor name">
+                </div>
+                <div class="form-group">
+                    <label>Specialization *</label>
+                    <input type="text" id="specialization" placeholder="e.g., Cardiology, Neurology">
+                </div>
+                <button onclick="addDoctor()">Add Doctor</button>
+            </div>
+
+            <div class="card">
+                <h2>Create Slot</h2>
+                <div id="slotMessage" class="message"></div>
+                <div class="form-group">
+                    <label>Select Doctor *</label>
+                    <select id="doctorSelect">
+                        <option value="">-- Loading doctors --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Start Time *</label>
+                    <input type="datetime-local" id="startTime">
+                </div>
+                <div class="form-group">
+                    <label>End Time *</label>
+                    <input type="datetime-local" id="endTime">
+                </div>
+                <div class="form-group">
+                    <label>Capacity (Number of Patients) *</label>
+                    <input type="number" id="capacity" placeholder="Enter capacity" min="1">
+                </div>
+                <button onclick="createSlot()">Create Slot</button>
+            </div>
+
+            <div class="card">
+                <h2>All Doctors</h2>
+                <div id="doctorsContainer" class="doctor-list">
+                    <div class="no-data">Loading doctors...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Bookings Tab -->
+        <div id="bookings" class="tab-content">
+            <div class="card">
+                <h2>Your Bookings</h2>
+                <div id="bookingsMessage" class="message"></div>
+                <div class="form-group">
+                    <label>Enter Booking ID</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="bookingId" placeholder="e.g., 550e8400-e29b-41d4-a716-446655440000" style="flex: 1;">
+                        <button onclick="getBookingDetails()" style="flex: 0 0 auto;">Search</button>
+                    </div>
+                </div>
+                <div id="bookingDetails"></div>
+                <div id="bookingsList" class="booking-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSlots();
+            loadDoctors();
+            checkConnection();
+        });
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Refresh data when switching
+            if (tabName === 'slots') loadSlots();
+            if (tabName === 'admin') {
+                loadDoctors();
+                loadAllDoctors();
+            }
+            if (tabName === 'bookings') loadBookingsList();
+        }
+
+        async function checkConnection() {
+            try {
+                const res = await fetch(`${API_BASE}/health`, { method: 'GET' });
+                if (res.ok) {
+                    document.getElementById('status').textContent = '✓ Connected';
+                    document.getElementById('status').classList.remove('error');
+                    document.getElementById('status').classList.add('connected');
+                } else {
+                    showConnectionError();
+                }
+            } catch (error) {
+                showConnectionError();
+            }
+        }
+
+        function showConnectionError() {
+            document.getElementById('status').textContent = '✗ Disconnected';
+            document.getElementById('status').classList.remove('connected');
+            document.getElementById('status').classList.add('error');
+        }
+
+        async function loadSlots() {
+            try {
+                const res = await fetch(`${API_BASE}/slots`);
+                const slots = await res.json();
+
+                const select = document.getElementById('slotSelect');
+                const container = document.getElementById('slotsContainer');
+
+                select.innerHTML = '<option value="">-- Select a slot --</option>';
+                container.innerHTML = '';
+
+                if (!slots || slots.length === 0) {
+                    container.innerHTML = '<div class="no-data">No slots available</div>';
+                    return;
+                }
+
+                slots.forEach(slot => {
+                    const option = document.createElement('option');
+                    option.value = JSON.stringify(slot);
+                    option.textContent = `${slot.doctor_name} - ${new Date(slot.start_time).toLocaleString()}`;
+                    select.appendChild(option);
+
+                    const card = createSlotCard(slot);
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading slots:', error);
+                document.getElementById('slotsContainer').innerHTML = '<div class="no-data">Error loading slots</div>';
+            }
+        }
+
+        function createSlotCard(slot) {
+            const card = document.createElement('div');
+            card.className = 'slot-card';
+
+            const startTime = new Date(slot.start_time).toLocaleString();
+            const endTime = new Date(slot.end_time).toLocaleString();
+            const available = slot.capacity - (slot.pending_count + slot.confirmed_count);
+            const percentUsed = ((slot.pending_count + slot.confirmed_count) / slot.capacity) * 100;
+
+            let barClass = '';
+            if (percentUsed >= 80) barClass = 'danger';
+            else if (percentUsed >= 50) barClass = 'warning';
+
+            card.innerHTML = `
+                <h3>${slot.doctor_name}</h3>
+                <p><strong>Start:</strong> ${startTime}</p>
+                <p><strong>End:</strong> ${endTime}</p>
+                <div class="capacity">
+                    <p><strong>Available:</strong> ${available} / ${slot.capacity}</p>
+                    <div class="capacity-bar">
+                        <div class="capacity-fill ${barClass}" style="width: ${percentUsed}%"></div>
+                    </div>
+                </div>
+                <button class="btn-book" onclick="selectSlot('${slot.id}')" ${available === 0 ? 'disabled' : ''}>
+                    ${available === 0 ? 'Fully Booked' : 'Book Now'}
+                </button>
+            `;
+
+            return card;
+        }
+
+        function selectSlot(slotId) {
+            const select = document.getElementById('slotSelect');
+            const option = Array.from(select.options).find(opt => {
+                try {
+                    const slot = JSON.parse(opt.value);
+                    return slot.id === slotId;
+                } catch (e) {
+                    return false;
+                }
+            });
+            if (option) {
+                select.value = option.value;
+                updateSlotInfo();
+            }
+            document.getElementById('book').classList.add('active');
+            document.querySelectorAll('.tab-button')[0].classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        }
+
+        function updateSlotInfo() {
+            const select = document.getElementById('slotSelect');
+            const container = document.getElementById('slotInfo');
+
+            if (!select.value) {
+                container.innerHTML = '';
+                return;
+            }
+
+            try {
+                const slot = JSON.parse(select.value);
+                const startTime = new Date(slot.start_time).toLocaleString();
+                const endTime = new Date(slot.end_time).toLocaleString();
+                const available = slot.capacity - (slot.pending_count + slot.confirmed_count);
+
+                container.innerHTML = `
+                    <div style="background: #f0f4ff; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <p><strong>Doctor:</strong> ${slot.doctor_name}</p>
+                        <p><strong>Time:</strong> ${startTime} to ${endTime}</p>
+                        <p><strong>Available Seats:</strong> ${available} / ${slot.capacity}</p>
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = '';
+            }
+        }
+
+        async function createBooking() {
+            const select = document.getElementById('slotSelect');
+            const name = document.getElementById('patientName').value.trim();
+            const contact = document.getElementById('patientContact').value.trim();
+            const msgDiv = document.getElementById('bookMessage');
+
+            if (!select.value || !name || !contact) {
+                showMessage(msgDiv, 'Please fill all fields', 'error');
+                return;
+            }
+
+            try {
+                const slot = JSON.parse(select.value);
+                const res = await fetch(`${API_BASE}/slots/${slot.id}/book`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ patient_name: name, patient_contact: contact })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    showMessage(msgDiv, `Booking successful! ID: ${data.id}`, 'success');
+                    document.getElementById('patientName').value = '';
+                    document.getElementById('patientContact').value = '';
+                    select.value = '';
+                    updateSlotInfo();
+                    loadSlots();
+                } else if (res.status === 409) {
+                    showMessage(msgDiv, 'No available seats for this slot', 'error');
+                } else {
+                    showMessage(msgDiv, data.error || 'Error creating booking', 'error');
+                }
+            } catch (error) {
+                showMessage(msgDiv, 'Error: ' + error.message, 'error');
+            }
+        }
+
+        async function loadDoctors() {
+            try {
+                const res = await fetch(`${API_BASE}/admin/doctors`);
+                const doctors = await res.json();
+
+                const select = document.getElementById('doctorSelect');
+                select.innerHTML = '<option value="">-- Select a doctor --</option>';
+
+                if (doctors && Array.isArray(doctors)) {
+                    doctors.forEach(doctor => {
+                        const option = document.createElement('option');
+                        option.value = doctor.id;
+                        option.textContent = `${doctor.name} (${doctor.specialization})`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading doctors:', error);
+            }
+        }
+
+        async function loadAllDoctors() {
+            try {
+                const res = await fetch(`${API_BASE}/admin/doctors`);
+                const doctors = await res.json();
+                const container = document.getElementById('doctorsContainer');
+
+                container.innerHTML = '';
+                if (!doctors || !Array.isArray(doctors) || doctors.length === 0) {
+                    container.innerHTML = '<div class="no-data">No doctors added yet</div>';
+                    return;
+                }
+
+                doctors.forEach(doctor => {
+                    const card = document.createElement('div');
+                    card.className = 'doctor-card';
+                    card.innerHTML = `
+                        <h3>${doctor.name}</h3>
+                        <p><strong>Specialization:</strong> ${doctor.specialization}</p>
+                        <p><strong>ID:</strong> ${doctor.id}</p>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading doctors:', error);
+            }
+        }
+
+        async function addDoctor() {
+            const name = document.getElementById('doctorName').value.trim();
+            const spec = document.getElementById('specialization').value.trim();
+            const msgDiv = document.getElementById('adminMessage');
+
+            if (!name || !spec) {
+                showMessage(msgDiv, 'Please fill all fields', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/admin/doctors`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, specialization: spec })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    showMessage(msgDiv, 'Doctor added successfully!', 'success');
+                    document.getElementById('doctorName').value = '';
+                    document.getElementById('specialization').value = '';
+                    loadDoctors();
+                    loadAllDoctors();
+                } else {
+                    showMessage(msgDiv, data.error || 'Error adding doctor', 'error');
+                }
+            } catch (error) {
+                showMessage(msgDiv, 'Error: ' + error.message, 'error');
+            }
+        }
+
+        async function createSlot() {
+            const doctorId = document.getElementById('doctorSelect').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const capacity = document.getElementById('capacity').value;
+            const msgDiv = document.getElementById('slotMessage');
+
+            if (!doctorId || !startTime || !endTime || !capacity) {
+                showMessage(msgDiv, 'Please fill all fields', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/admin/doctors/${doctorId}/slots`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        start_time: new Date(startTime).toISOString(),
+                        end_time: new Date(endTime).toISOString(),
+                        capacity: parseInt(capacity)
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    showMessage(msgDiv, 'Slot created successfully!', 'success');
+                    document.getElementById('startTime').value = '';
+                    document.getElementById('endTime').value = '';
+                    document.getElementById('capacity').value = '';
+                    loadSlots();
+                    loadAllDoctors();
+                } else {
+                    showMessage(msgDiv, data.error || 'Error creating slot', 'error');
+                }
+            } catch (error) {
+                showMessage(msgDiv, 'Error: ' + error.message, 'error');
+            }
+        }
+
+        async function getBookingDetails() {
+            const bookingId = document.getElementById('bookingId').value.trim();
+            const container = document.getElementById('bookingDetails');
+            const msgDiv = document.getElementById('bookingsMessage');
+
+            if (!bookingId) {
+                showMessage(msgDiv, 'Please enter a booking ID', 'error');
+                return;
+            }
+
+            try {
+                // Note: You may need to add an endpoint to get booking details
+                showMessage(msgDiv, 'Enter your booking ID to confirm the appointment', 'info');
+                container.innerHTML = `
+                    <button onclick="confirmBooking('${bookingId}')" style="background: #4caf50; margin-top: 10px;">Confirm Booking</button>
+                `;
+            } catch (error) {
+                showMessage(msgDiv, 'Error: ' + error.message, 'error');
+            }
+        }
+
+        async function confirmBooking(bookingId) {
+            const msgDiv = document.getElementById('bookingsMessage');
+
+            try {
+                const res = await fetch(`${API_BASE}/bookings/${bookingId}/confirm`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    showMessage(msgDiv, 'Booking confirmed successfully!', 'success');
+                    document.getElementById('bookingId').value = '';
+                    document.getElementById('bookingDetails').innerHTML = '';
+                } else {
+                    showMessage(msgDiv, data.error || 'Error confirming booking', 'error');
+                }
+            } catch (error) {
+                showMessage(msgDiv, 'Error: ' + error.message, 'error');
+            }
+        }
+
+        async function loadBookingsList() {
+            const container = document.getElementById('bookingsList');
+            const msgDiv = document.getElementById('bookingsMessage');
+
+            try {
+                msgDiv.textContent = 'Load bookings by entering their IDs above';
+                msgDiv.className = 'message info';
+                container.innerHTML = '';
+            } catch (error) {
+                showMessage(msgDiv, 'Error: ' + error.message, 'error');
+            }
+        }
+
+        function showMessage(element, message, type) {
+            element.textContent = message;
+            element.className = `message ${type}`;
+        }
+
+        // Refresh data every 30 seconds
+        setInterval(() => {
+            checkConnection();
+        }, 30000);
+    </script>
+</body>
+</html>
